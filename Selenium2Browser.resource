@@ -1,4 +1,5 @@
 *** Settings ***
+Library     Collections
 Library     String
 Library     Browser    strict=${False}
 
@@ -38,7 +39,7 @@ Input Text Into Alert
     ${action}=    Convert To Lower Case    ${action}
     Handle Future Dialogs    action=${action}    prompt_input=${text}
 
-### Browser Keywords ###
+### Browser Keywords
 
 Switch Browser To Main
     [Arguments]    ${index}=0
@@ -77,18 +78,18 @@ Page Should Not Contain Checkbox
 
 ### Click Keywords
 
-Click Button
-    [Arguments]    ${text}
-    Click    text="${text}"
+# Click Button
+#    [Arguments]    ${text}
+#    Click    text="${text}"
 
 Click Element
     [Arguments]    ${selector}
     ${locator}=    Adjust Locator To Browser Library    ${selector}
     Click    ${locator}
 
-Click Link
-    [Arguments]    ${text}
-    Click    text="${text}"
+# Click Link
+#    [Arguments]    ${text}
+#    Click    text="${text}"
 
 Double Click Element
     [Arguments]    ${selector}    ${click_count}=2
@@ -233,6 +234,15 @@ Set Focus To Element
 
 ### Frame Keywords ###
 
+Select Frame
+    [Arguments]    ${selector}    ${scope}=Test
+    ${locator}=    Adjust Locator To Browser Library    ${selector}
+    Set Selector Prefix    ${locator} >>>    ${scope}
+
+Unselect Frame
+    [Arguments]    ${scope}=Test
+    Set Selector Prefix    ${None}    ${scope}
+
 ### Javascript ###
 
 Execute Javascript
@@ -244,6 +254,14 @@ Execute Javascript
 Get Location
     ${url}=    Get Url
     RETURN    ${url}
+
+Log Location
+    ${url}=    Get Url
+    Log    ${url}
+
+Location Should Be
+    [Arguments]    ${full_url}    ${operator}=equals
+    Get Url    ${operator}    ${full_url}
 
 Location Should Contain
     [Arguments]    ${partial_url}    ${operator}=contains
@@ -268,8 +286,13 @@ Wait Until Location Is Not
 ### Screenshot ###
 
 Capture Page Screenshot
-    [Arguments]    ${type}=EMBED
-    Take Screenshot    ${type}
+    [Arguments]    ${filename}=EMBED
+    Take Screenshot    filename=${filename}
+
+Capture Element Screenshot
+    [Arguments]    ${selector}    ${filename}=EMBED
+    ${locator}=    Adjust Locator To Browser Library    ${selector}
+    Take Screenshot    filename=${filename}    selector=${locator}
 
 ### Text keywords
 
@@ -374,3 +397,95 @@ Adjust Locator To Browser Library
     # check if selector is either xpath, css or text
     ${locator}=    Replace String    ${selector}    :    =    1
     RETURN    ${locator}
+
+# Source Keyword
+
+Get Source
+    ${source}=    Get Page Source
+    RETURN    ${source}
+
+Log Source
+    ${source}=    Get Page Source
+    Log    ${source}
+
+# Upload keywords
+
+Choose File
+    [Arguments]    ${selector}    ${path}
+    ${locator}=    Adjust Locator To Browser Library    ${selector}
+    Upload File By Selector    ${locator}    ${path}
+
+# Title keywords
+
+Log Title
+    ${title}=    Get Title
+    Log    ${title}
+
+Title Should Be
+    [Arguments]    ${text}    ${operator}=equals
+    Get Title    ${operator}    ${text}
+
+# Scroll Keywords
+
+Scroll Element Into View
+    [Arguments]    ${selector}
+    ${locator}=    Adjust Locator To Browser Library    ${selector}
+    Scroll To Element    ${locator}
+
+# Navigation Keywords
+
+Reload Page
+    Reload
+
+# Mouse Keywords
+
+Mouse Down
+    [Arguments]    ${selector}    ${action}=down
+    ${locator}=    Adjust Locator To Browser Library    ${selector}
+    Mouse Move Relative To    ${locator}
+    Mouse Button    ${action}
+
+Mouse Out
+    [Arguments]    ${selector}    ${x}=-100
+    ${locator}=    Adjust Locator To Browser Library    ${selector}
+    Mouse Move Relative To    ${locator}    ${x}
+
+Mouse Over
+    [Arguments]    ${selector}
+    ${locator}=    Adjust Locator To Browser Library    ${selector}
+    Hover    ${locator}
+
+Mouse Up
+    [Arguments]    ${selector}    ${action}=up
+    ${locator}=    Adjust Locator To Browser Library    ${selector}
+    Mouse Move Relative To    ${locator}
+    Mouse Button    ${action}
+
+# Cookie Keywords
+
+Delete Cookie
+    [Arguments]    ${name}
+    @{cookies}=    Get Cookies
+    Delete All Cookies
+    FOR    ${cookie}    IN    @{cookies}
+        # ${cookie_key}=    Get Dictionary Keys    ${cookie}
+        # ${cookie_value}=    Get Dictionary Values    ${cookie}
+        IF    '${cookie.name}' != '${name}'
+            Add Cookie    name=${cookie.name}    value=${cookie.value}
+            ...    domain=${cookie.domain}    path=${cookie.path}
+        END
+    END
+
+# WebElement Keywords
+
+Get WebElement
+    [Arguments]    ${selector}
+    ${locator}=    Adjust Locator To Browser Library    ${selector}
+    ${element}=    Get Element    ${locator}
+    RETURN    ${element}
+
+Get WebElements
+    [Arguments]    ${selector}
+    ${locator}=    Adjust Locator To Browser Library    ${selector}
+    @{elements}=    Get Elements    ${locator}
+    RETURN    ${elements}
